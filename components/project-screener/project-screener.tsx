@@ -38,7 +38,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { MiningProject, ProjectStage, Commodity, RiskLevel } from "@/lib/types/mining-project"
-import { useProjects } from "@/lib/hooks/use-projects"
+import { useWatchlistProjects } from "@/lib/hooks/use-watchlist-projects"
+import Link from 'next/link'
 import { ProjectFilters } from "./project-filters"
 import { BulkActionsToolbar } from "./bulk-actions-toolbar"
 import { ProjectDetailPanel } from "@/components/project-detail-panel"
@@ -116,7 +117,7 @@ interface DetailPanelState {
 }
 
 export function ProjectScreener() {
-  const { projects: data, loading, error, refetch } = useProjects()
+  const { projects: data, loading, error, refetch } = useWatchlistProjects()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -534,7 +535,12 @@ export function ProjectScreener() {
     <>
       <div className="w-full space-y-4 relative">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight">Projects Screener — {data.length} deposits</h2>
+          <div>
+            <h2 className="text-2xl font-semibold tracking-tight">Watchlisted Projects — {data.length} deposits</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Showing your watchlisted projects. <Link href="/global-projects" className="text-primary hover:underline">Browse all projects →</Link>
+            </p>
+          </div>
           <div className="flex items-center gap-2">
             <MiningAgentV2Button 
               onComplete={refetch} 

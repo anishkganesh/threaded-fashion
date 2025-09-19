@@ -44,8 +44,9 @@ export function useProjects() {
         return
       }
 
+      // Try to fetch from projects table directly
       const { data, error } = await client
-        .from('project_screener_view')
+        .from('projects')
         .select('*')
         .order('updated_at', { ascending: false })
 
@@ -54,29 +55,32 @@ export function useProjects() {
       // Transform database data to match MiningProject interface
       const transformedProjects: MiningProject[] = (data || []).map((project: any) => ({
         id: project.id,
-        project: project.project_name,
-        company: project.company_name,
-        stage: project.stage,
+        project: project.project_name || 'Unknown',
+        company: project.company_name || 'Unknown',
+        stage: project.stage || 'Exploration',
         mineLife: project.mine_life_years || 0,
         postTaxNPV: project.post_tax_npv_usd_m || 0,
         irr: project.irr_percent || 0,
         payback: project.payback_years || 0,
-        paybackYears: project.payback_years || 0, // Add missing field
+        paybackYears: project.payback_years || 0,
         capex: project.capex_usd_m || 0,
         aisc: project.aisc_usd_per_tonne || 0,
-        primaryCommodity: project.primary_commodity,
-        jurisdiction: project.jurisdiction_and_risk,
+        primaryCommodity: project.primary_commodity || 'Unknown',
+        jurisdiction: `${project.jurisdiction || ''}, ${project.country || ''}`.trim() || 'Unknown',
         jurisdictionRisk: project.jurisdiction_risk || 'Medium',
-        riskLevel: project.jurisdiction_risk || 'Medium', // Add missing field
-        investorsOwnership: project.investors_ownership_text || '',
+        riskLevel: project.jurisdiction_risk || 'Medium',
+        investorsOwnership: project.investors_ownership?.[0] || project.ownership_structure || '',
         resourceGrade: project.resource_grade || 0,
         containedMetal: project.contained_metal || 0,
         esgScore: project.esg_score || 'C',
         redFlags: project.red_flag_count || 0,
         permitStatus: project.permit_status || 'Pending',
         offtakeAgreements: project.offtake_count || 0,
-        lastUpdated: project.updated_at || new Date().toISOString(), // Add missing field
-        dataQuality: 'High' as const // Add missing field with default value
+        lastUpdated: project.updated_at || new Date().toISOString(),
+        dataQuality: 'High' as const,
+        watchlist: project.watchlist || false,
+        watchlisted_at: project.watchlisted_at,
+        generated_image_url: project.generated_image_url
       }))
 
       setProjects(transformedProjects)

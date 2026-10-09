@@ -50,8 +50,8 @@ The product mapper supplies several presentation defaults such as style, sizes, 
 ## Run locally
 
 ```bash
-git clone https://github.com/anishkganesh/threaded.git
-cd threaded
+git clone https://github.com/anishkganesh/threaded-fashion.git
+cd threaded-fashion
 npm ci
 ```
 

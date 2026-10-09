@@ -1,165 +1,111 @@
 # Threaded
 
-**AI-Powered Personal Fashion Stylist**
+A fashion-discovery application with a searchable product grid, product detail views, recommendations, a local shopping cart, and an AI chat interface.
 
-Threaded is a B2C web application that provides personalized fashion recommendations tailored to your unique style. Using AI technology, we curate clothing items from premium brands that match your preferences and existing wardrobe.
+[Website](https://threaded-psi.vercel.app) · [Source](https://github.com/anishkganesh/threaded)
+
+## Overview
+
+Threaded uses Next.js and Supabase for its application and account flows. The main product grid loads database records through a server API; some surrounding experiences are demonstrations backed by mock data or timed animations. The repository also retains components and routes from an earlier mining-analysis application.
 
 ## Features
 
-### Personalized Recommendations
-- AI-curated fashion items from luxury and contemporary brands
-- Smart matching based on your style preferences
-- Daily updates with new discoveries
+- Sign up and sign in with Supabase email/password authentication.
+- Load products from Supabase and display category filters and product details.
+- Show related products using client-side category/style matching.
+- Maintain a shopping cart in browser storage.
+- Ask an OpenAI-backed chat interface questions with product/database context.
+- Preview a notification feed and an animated fashion-agent interaction.
 
-### Wardrobe Integration
-- Upload photos of your existing clothes (optional)
-- Get recommendations that complement what you already own
-- Build a digital closet for better styling suggestions
+## Architecture
 
-### Fashion Agent
-- Automated discovery of new items matching your style
-- Real-time scanning of premium retailers
-- Progress tracking and notifications
+1. `app/page.tsx` requires a signed-in user through the client authentication hook.
+2. `/api/products` reads the Supabase `products` table, ordering records by creation time and applying offset/limit pagination. The main page initially requests 50 products.
+3. `lib/penn-products.ts` maps database rows into the UI product shape.
+4. Product details, filtering, recommendations, and the cart operate in the browser.
+5. Server chat routes call OpenAI and can retrieve database context.
 
-### Smart Notifications
-- Alerts for new recommendations
-- Price drop notifications
-- Back-in-stock alerts for saved items
+The product mapper supplies several presentation defaults such as style, sizes, material, and stock state. Those defaults are not verified retailer inventory attributes. Related products are a heuristic filter, not a trained recommendation model.
 
-### AI Stylist Chat
-- Ask questions about any product
-- Get styling advice and outfit suggestions
-- Receive personalized fashion guidance
+## Tech stack
 
-### Seamless Shopping
-- View detailed product information
-- Find similar items instantly
-- One-click access to brand websites
-- Add items to cart for easy tracking
+| Layer | Implementation |
+| --- | --- |
+| Application | Next.js 15, React 19, TypeScript |
+| UI | Tailwind CSS, Radix/shadcn components |
+| Identity and data | Supabase Auth and Postgres |
+| AI chat | OpenAI |
+| Cart persistence | Browser `localStorage` |
 
-## Tech Stack
+## Project structure
 
-- **Framework**: Next.js 15.2.4 with App Router
-- **Language**: TypeScript
-- **UI**: Radix UI + shadcn/ui components
-- **Styling**: Tailwind CSS
-- **Database**: Supabase (PostgreSQL)
-- **Authentication**: Supabase Auth
-- **AI**: OpenAI API
+- `app/` — pages, login/signup, and server API routes.
+- `components/` — fashion grid, product detail panels, agent UI, and retained analysis components.
+- `lib/penn-products.ts` — database-to-product mapping.
+- `lib/cart-context.tsx` — local cart state.
+- `lib/` and `hooks/` — authentication, data access, and supporting utilities.
+- `supabase/migrations/` — schema migrations, largely inherited from the mining application.
+- `scripts/` — migration runners and data population scripts.
 
-## Getting Started
+## Run locally
 
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-- Supabase account
-
-### Installation
-
-1. Clone the repository
 ```bash
-git clone <repository-url>
+git clone https://github.com/anishkganesh/threaded.git
 cd threaded
+npm ci
 ```
 
-2. Install dependencies
-```bash
-npm install
+Create `.env.local` yourself; no `.env.example` is committed:
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-server-only-service-role-key
+OPENAI_API_KEY=your-openai-key
 ```
 
-3. Set up environment variables
-```bash
-cp .env.example .env.local
-```
+Configure the database and Supabase Auth before starting:
 
-Add your environment variables:
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-OPENAI_API_KEY=your_openai_api_key
-```
-
-4. Run the development server
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open `http://localhost:3000`, create an account, and sign in. For a production server, run `npm run build` and then `npm start`.
 
-## User Workflow
+## Configuration and data
 
-1. **Sign Up** - Create your account to get started
-2. **Upload Wardrobe** - Optionally add photos of your existing clothes
-3. **Browse Recommendations** - Explore AI-curated fashion items
-4. **View Details** - Click any item to see full details and similar products
-5. **Take Action** - Save favorites, add to cart, or view on brand website
-6. **Run Fashion Agent** - Let AI discover new items for you
-7. **Stay Updated** - Receive notifications about new finds and updates
+The fashion flow needs `products` and `users` tables. Product mapping reads fields including `id`, `product_url`, `image_url`, `name`, `price`, `domain`, `created_at`, `brand_name`, `category`, `description`, and `currency`. The signup handler creates an Auth user and then inserts a profile record, including handle, email, metadata, and timestamps.
 
-## Project Structure
+Inspect `/api/auth/signup`, `/api/products`, and the Supabase queries for the exact schema and permissions. The committed SQL files are largely inherited from the mining application and do not constitute a complete fashion database bootstrap. Mining company/project population scripts do not populate the fashion catalog.
 
-```
-threaded/
-├── app/                    # Next.js app directory
-│   ├── api/               # API routes
-│   ├── notifications/     # Notifications page
-│   ├── login/            # Authentication
-│   └── signup/
-├── components/            # React components
-│   ├── fashion-recommendations/
-│   │   ├── fashion-grid.tsx
-│   │   └── product-detail-panel.tsx
-│   ├── fashion-agent-button.tsx
-│   └── ui/               # Reusable UI components
-├── lib/                   # Core utilities
-│   ├── types/            # TypeScript definitions
-│   └── data/             # Mock data
-└── public/               # Static assets
+Keep the service-role key server-side. Configure access policies and production redirects in your own Supabase project.
+
+## Usage
+
+Sign in, browse the loaded catalog, inspect a product, and add items to the cart. Use chat for product exploration. The cart is local state: checkout, payment processing, and retailer order fulfillment are not implemented.
+
+The notification page uses mock fashion-product data. The fashion-agent progress animation and its reported item count are simulated; the button does not run a live product crawler. Retained investor-memo and mining routes are separate from the primary fashion flow.
+
+## Validation
+
+```bash
+npm run lint
+npm run build
 ```
 
-## Design Philosophy
+No dedicated automated fashion test suite is included. Manually verify signup/profile creation, login, catalog loading, filtering, details, chat, and cart persistence against a configured Supabase project. No runtime pass is asserted by this documentation review.
 
-Threaded embraces a **minimalist, classy aesthetic** inspired by premium fashion brands:
+## Deployment
 
-- Clean, spacious layouts
-- High-quality product imagery
-- Subtle animations and transitions
-- Intuitive navigation
-- Sophisticated color palette
-- Typography-focused design
+Deploy as a Next.js application with the same environment and database setup. Review `vercel.json` before deployment: it contains a function entry for `app/dashboard/page.tsx`, a path absent from this snapshot. The website link above is provided by the project metadata; availability has not been verified here.
 
-## Current Status
+## Limitations
 
-This is a frontend demonstration with mock data. Key features implemented:
+- Authentication gating is implemented in the client; server endpoints require their own authorization review.
+- The catalog depends on separately provisioned data.
+- Several product attributes and surrounding interactions are defaults or mocks.
+- Inherited modules increase the repository scope beyond the fashion application.
 
-Fashion recommendation grid
-Product detail panels
-Similar item discovery
-Fashion agent UI (simulated)
-Notification system
-AI stylist chat integration
-Responsive design
-Authentication flow
+## Attribution and license
 
-## Roadmap
-
-Future enhancements could include:
-
-- Real fashion API integration
-- Actual wardrobe upload and analysis
-- Advanced filtering and search
-- Outfit builder
-- Social sharing features
-- Wishlist and collections
-- Purchase history tracking
-- Sustainability scoring
-
-## Contributing
-
-This project is currently in development. Contributions, issues, and feature requests are welcome.
-
-## License
-
-Private and confidential.
+No standalone license file is included. This README does not grant a new license.

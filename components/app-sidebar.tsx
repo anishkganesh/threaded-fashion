@@ -23,7 +23,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/lib/auth-context'
-import { useUserData } from '@/lib/hooks/use-user-data'
+import { useUserData } from '@/hooks/use-user-data'
 import { useCart } from '@/lib/cart-context'
 import { Badge } from '@/components/ui/badge'
 

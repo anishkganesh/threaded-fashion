@@ -2,6 +2,8 @@
 
 A fashion-discovery application with a searchable product grid, product detail views, recommendations, a local shopping cart, and an AI chat interface.
 
+Won the CIS Senior Design Technical Innovation Award at Penn (50+ teams).
+
 ## Overview
 
 Threaded uses Next.js and Supabase for its application and account flows. The main product grid loads database records through a server API; the notification feed uses mock data.
